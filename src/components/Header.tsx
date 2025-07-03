@@ -1,11 +1,60 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Search, Bell, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Mock search suggestions data
+  const mockSuggestions = [
+    'Stranger Things', 'The Crown', 'Dark', 'The Witcher', 'Money Heist',
+    'Breaking Bad', 'Better Call Saul', 'The Office', 'Friends', 'Narcos',
+    'House of Cards', 'Black Mirror', 'The Mandalorian', 'Squid Game',
+    'Bridgerton', 'Ozark', 'The Queen\'s Gambit', 'Lupin', 'Emily in Paris'
+  ];
+
+  // Handle search input changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (query.length > 0) {
+      const filtered = mockSuggestions.filter(item =>
+        item.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 5);
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion: string) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+    console.log('Searching for:', suggestion);
+  };
+
+  // Handle click outside to close search
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchOpen(false);
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm transition-all duration-300">
@@ -22,18 +71,28 @@ const Header = () => {
             
             {/* Navigation */}
             <nav className="hidden md:flex space-x-6">
-              <a href="#" className="text-white hover:text-gray-300 transition-colors">Home</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">TV Shows</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">Movies</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">New & Popular</a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">My List</a>
+              <a href="/" className="text-white hover:text-gray-300 transition-colors">
+                Home
+              </a>
+              <a href="/tv-shows" className="text-gray-400 hover:text-white transition-colors">
+                TV Shows
+              </a>
+              <a href="/movies" className="text-gray-400 hover:text-white transition-colors">
+                Movies
+              </a>
+              <a href="/new-popular" className="text-gray-400 hover:text-white transition-colors">
+                New & Popular
+              </a>
+              <a href="/my-list" className="text-gray-400 hover:text-white transition-colors">
+                My List
+              </a>
             </nav>
           </div>
 
           {/* Right side */}
           <div className="flex items-center space-x-4">
             {/* Search */}
-            <div className="relative">
+            <div className="relative" ref={searchRef}>
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
                 className="p-2 hover:bg-gray-800 rounded-full transition-colors"
@@ -42,13 +101,35 @@ const Header = () => {
               </button>
               
               {searchOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-black/95 border border-gray-700 rounded-lg p-3">
-                  <input
-                    type="text"
-                    placeholder="Search for movies, TV shows..."
-                    className="w-full bg-transparent border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:border-red-500 focus:outline-none"
-                    autoFocus
-                  />
+                <div className="absolute right-0 top-full mt-2 w-80 bg-black/95 border border-gray-700 rounded-lg">
+                  <div className="p-3">
+                    <input
+                      type="text"
+                      placeholder="Search for movies, TV shows..."
+                      className="w-full bg-transparent border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:border-red-500 focus:outline-none"
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                      autoFocus
+                    />
+                  </div>
+                  
+                  {/* Search Suggestions */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="border-t border-gray-700">
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="w-full text-left px-4 py-3 hover:bg-gray-800 transition-colors text-white text-sm border-b border-gray-700 last:border-b-0"
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Search className="w-4 h-4 text-gray-400" />
+                            <span>{suggestion}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
