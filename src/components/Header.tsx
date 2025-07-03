@@ -74,17 +74,8 @@ const Header = () => {
               <a href="/" className="text-white hover:text-gray-300 transition-colors">
                 Home
               </a>
-              <a href="/tv-shows" className="text-gray-400 hover:text-white transition-colors">
-                TV Shows
-              </a>
-              <a href="/movies" className="text-gray-400 hover:text-white transition-colors">
-                Movies
-              </a>
-              <a href="/new-popular" className="text-gray-400 hover:text-white transition-colors">
-                New & Popular
-              </a>
-              <a href="/my-list" className="text-gray-400 hover:text-white transition-colors">
-                My List
+              <a href="/my-netflix" className="text-gray-400 hover:text-white transition-colors">
+                MyNetflix
               </a>
             </nav>
           </div>
